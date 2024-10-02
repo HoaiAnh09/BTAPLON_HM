@@ -12,15 +12,15 @@ app = Flask(__name__)
 # 1. Đọc và tiền xử lý dữ liệu
 df = pd.read_csv('student-mat.csv', sep=';')
 
-# Chỉ lấy các cột cần thiết
-df = df[['sex', 'traveltime', 'studytime', 'failures', 'G3']]
+# Chỉ lấy các cột cần thiết (bỏ traveltime)
+df = df[['sex', 'studytime', 'failures', 'G3']]
 
 # Biến đổi cột 'sex' thành nhãn số (Label Encoding)
 le = LabelEncoder()
 df['sex'] = le.fit_transform(df['sex'])
 
 # Tách biến đầu vào và biến mục tiêu
-X = df[['sex', 'traveltime', 'studytime', 'failures']]
+X = df[['sex', 'studytime', 'failures']]
 y = df['G3']
 
 # Chia dữ liệu thành tập train và test
@@ -60,7 +60,6 @@ def predict():
     if request.method == 'POST':
         # Lấy dữ liệu từ form
         sex = request.form['sex']
-        traveltime = float(request.form['traveltime'])
         studytime = float(request.form['studytime'])
         failures = float(request.form['failures'])
 
@@ -68,7 +67,7 @@ def predict():
         sex = le.transform([sex])[0]
         
         # Chuẩn bị dữ liệu để dự đoán
-        features = np.array([[sex, traveltime, studytime, failures]])
+        features = np.array([[sex, studytime, failures]])
         
         # Dự đoán với các mô hình
         pred_linear = linear_model.predict(features)[0]
