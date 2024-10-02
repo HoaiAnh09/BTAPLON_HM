@@ -4,42 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dự đoán kết quả học tập</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        form {
+            border: 2px solid #4CAF50;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        #result-container {
+            display: none;  /* Ẩn phần kết quả cho đến khi có dự đoán  */
+            margin-top: 20px;
+            border: 2px solid #4CAF50;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #e8f5e9;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h3, h4 {
+            margin: 0;
+        }
+
+        .result-section {
+            margin-bottom: 15px;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+    </style>
+    <script>
+        function showResults() {
+            document.getElementById('result-container').style.display = 'block';  // Hiển thị phần kết quả
+        }
+    </script>
 </head>
 <body>
     <h2>Dự đoán kết quả học tập</h2>
-    <form action="/predict" method="POST">
-        <label for="sex">Giới tính (M/F):</label><br>
-        <input type="text" id="sex" name="sex"><br><br>
-
-        <label for="traveltime">Thời gian đi lại (1-4):</label><br>
-        <input type="number" id="traveltime" name="traveltime" step="1"><br><br>
+    <form action="/predict" method="POST" onsubmit="showResults()">
+        <label for="sex">Giới tính:</label><br>
+        <select id="sex" name="sex" required>
+            <option value="M">Nam</option>
+            <option value="F">Nữ</option>
+        </select><br><br>
 
         <label for="studytime">Thời gian học tập (1-4):</label><br>
-        <input type="number" id="studytime" name="studytime" step="1"><br><br>
+        <input type="number" id="studytime" name="studytime" step="1" min="1" max="4" required><br><br>
 
         <label for="failures">Số lần trượt môn:</label><br>
-        <input type="number" id="failures" name="failures" step="1"><br><br>
+        <input type="number" id="failures" name="failures" step="1" min="0" required><br><br>
 
         <input type="submit" value="Dự đoán">
     </form>
 
-    <h3>Kết quả dự đoán:</h3>
-    <h4>Hồi quy tuyến tính</h4>
-    <p>Dự đoán: {{ pred_linear }}<br>
-    R²: {{ r2_linear }}<br>
-    MSE: {{ mse_linear }}<br>
-    RMSE: {{ rmse_linear }}</p>
+    <div id="result-container">
+        <h3>Kết quả dự đoán:</h3>
+        <h4>Hồi quy tuyến tính</h4>
+        <p>Dự đoán: {{ pred_linear }}<br>
+        R²: {{ r2_linear }}<br>
+        MSE: {{ mse_linear }}<br>
+        RMSE: {{ rmse_linear }}</p>
 
-    <h4>Lasso</h4>
-    <p>Dự đoán: {{ pred_lasso }}<br>
-    R²: {{ r2_lasso }}<br>
-    MSE: {{ mse_lasso }}<br>
-    RMSE: {{ rmse_lasso }}</p>
+        <h4>Lasso</h4>
+        <p>Dự đoán: {{ pred_lasso }}<br>
+        R²: {{ r2_lasso }}<br>
+        MSE: {{ mse_lasso }}<br>
+        RMSE: {{ rmse_lasso }}</p>
 
-    <h4>Neural Network (MLP)</h4>
-    <p>Dự đoán: {{ pred_mlp }}<br>
-    R²: {{ r2_mlp }}<br>
-    MSE: {{ mse_mlp }}<br>
-    RMSE: {{ rmse_mlp }}</p>
+        <h4>Neural Network (MLP)</h4>
+        <p>Dự đoán: {{ pred_mlp }}<br>
+        R²: {{ r2_mlp }}<br>
+        MSE: {{ mse_mlp }}<br>
+        RMSE: {{ rmse_mlp }}</p>
+    </div>
 </body>
 </html>
