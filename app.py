@@ -1,18 +1,16 @@
+import streamlit as st
 import pandas as pd
 import numpy as np
-from flask import Flask, request, render_template
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Lasso
 from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.preprocessing import LabelEncoder
 
-app = Flask(__name__)
-
 # 1. Đọc và tiền xử lý dữ liệu
 df = pd.read_csv('student-mat.csv', sep=';')
 
-# Chỉ lấy các cột cần thiết (bỏ traveltime)
+# Chỉ lấy các cột cần thiết
 df = df[['sex', 'studytime', 'failures', 'G3']]
 
 # Biến đổi cột 'sex' thành nhãn số (Label Encoding)
@@ -51,34 +49,41 @@ r2_mlp = r2_score(y_test, y_pred_mlp)
 mse_mlp = mean_squared_error(y_test, y_pred_mlp)
 rmse_mlp = np.sqrt(mse_mlp)
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+# 3. Giao diện Streamlit
+st.title("Dự đoán kết quả học tập")
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    if request.method == 'POST':
-        # Lấy dữ liệu từ form
-        sex = request.form['sex']
-        studytime = float(request.form['studytime'])
-        failures = float(request.form['failures'])
+# Nhập thông tin từ người dùng
+sex = st.selectbox("Giới tính", ("Nam", "Nữ"))
+studytime = st.slider("Thời gian học tập (1-4)", 1, 4, 2)
+failures = st.slider("Số lần trượt môn", 0, 3, 0)
 
-        # Chuyển đổi giới tính (sex)
-        sex = le.transform([sex])[0]
-        
-        # Chuẩn bị dữ liệu để dự đoán
-        features = np.array([[sex, studytime, failures]])
-        
-        # Dự đoán với các mô hình
-        pred_linear = linear_model.predict(features)[0]
-        pred_lasso = lasso_model.predict(features)[0]
-        pred_mlp = mlp_model.predict(features)[0]
-        
-        # Kết quả dự đoán và độ tin cậy cho từng mô hình
-        return render_template('index.html', 
-                               pred_linear=f'{pred_linear:.2f}', r2_linear=f'{r2_linear:.2f}', mse_linear=f'{mse_linear:.2f}', rmse_linear=f'{rmse_linear:.2f}',
-                               pred_lasso=f'{pred_lasso:.2f}', r2_lasso=f'{r2_lasso:.2f}', mse_lasso=f'{mse_lasso:.2f}', rmse_lasso=f'{rmse_lasso:.2f}',
-                               pred_mlp=f'{pred_mlp:.2f}', r2_mlp=f'{r2_mlp:.2f}', mse_mlp=f'{mse_mlp:.2f}', rmse_mlp=f'{rmse_mlp:.2f}')
+# Chuyển đổi giới tính
+sex = 1 if sex == "Nam" else 0
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# Khi người dùng nhấn nút "Dự đoán"
+if st.button("Dự đoán"):
+    # Chuẩn bị dữ liệu để dự đoán
+    features = np.array([[sex, studytime, failures]])
+
+    # Dự đoán với các mô hình
+    pred_linear = linear_model.predict(features)[0]
+    pred_lasso = lasso_model.predict(features)[0]
+    pred_mlp = mlp_model.predict(features)[0]
+
+    # Hiển thị kết quả
+    st.subheader("Kết quả dự đoán:")
+    
+    # Linear Regression
+    st.write("### Hồi quy tuyến tính")
+    st.write(f"Dự đoán: {pred_linear:.2f}")
+    st.write(f"R²: {r2_linear:.2f}, MSE: {mse_linear:.2f}, RMSE: {rmse_linear:.2f}")
+
+    # Lasso Regression
+    st.write("### Lasso")
+    st.write(f"Dự đoán: {pred_lasso:.2f}")
+    st.write(f"R²: {r2_lasso:.2f}, MSE: {mse_lasso:.2f}, RMSE: {rmse_lasso:.2f}")
+
+    # Neural Network (MLP)
+    st.write("### Neural Network (MLP)")
+    st.write(f"Dự đoán: {pred_mlp:.2f}")
+    st.write(f"R²: {r2_mlp:.2f}, MSE: {mse_mlp:.2f}, RMSE: {rmse_mlp:.2f}")
